@@ -2,36 +2,31 @@ import pygame
 import random
 import os
 
-# Initialize pygame
 pygame.init()
 
-# Screen dimensions
+# Разрешение
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
-# Colors
+# цвета
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-BLUE_SHADE = (100, 149, 237)  # Nice blue shade for the progress bar
+BLUE_SHADE = (100, 149, 237)
 
-# Initialize screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 pygame.display.set_caption("Recycle Game")
 
-# Clock
 clock = pygame.time.Clock()
 
-# Fonts
-font = pygame.font.Font(None, 36)  # Use a nicer font (replace "arial.ttf" with your font file)
+font = pygame.font.Font(None, 36)
 
-
-# Load and resize background images
+#Фон
 backgrounds = [
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "first_level.jpg")), (SCREEN_WIDTH, SCREEN_HEIGHT)),  # Level 1
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "second_level.jpg")), (SCREEN_WIDTH, SCREEN_HEIGHT)),  # Level 2
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "third_level.jpg")), (SCREEN_WIDTH, SCREEN_HEIGHT))   # Level 3
 ]
-# Load player images for each level
+# Игрок
 player_images = [
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "player1.png")), (100, 100)),  # Level 1
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "player2.png")), (100, 100)),  # Level 2
@@ -39,7 +34,7 @@ player_images = [
 ]
 
 
-# Load organic garbage images
+# Орг мусор
 organic_size = (60, 60)
 organic_garbage_images = [
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "банана.png")), organic_size),
@@ -48,8 +43,6 @@ organic_garbage_images = [
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "мясо.png")), organic_size),
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "яблоко.png")), organic_size)
 ]
-
-
 
 
 plastic_size = (60, 60)  
@@ -66,14 +59,10 @@ recyclable_plastic_images = [
 ]
 
 
-# Load background music
+#Музыка
 pygame.mixer.music.load(os.path.join("assets", "Aisatsana.mp3"))
 pygame.mixer.music.play(-1)  # Loop the music indefinitely
 
-
-
-
-# Game variables
 player_x = SCREEN_WIDTH // 2
 player_y = SCREEN_HEIGHT - 100
 player_width = 100
@@ -86,7 +75,7 @@ score = 0
 item_speed = 5
 current_level = 0
 
-# Progress bar variables
+# прогрес бар
 progress_bar_width = int(SCREEN_WIDTH * 0.6)  # 60% of the screen width
 progress_bar_height = 20
 progress_bar_x = (SCREEN_WIDTH - progress_bar_width) // 2  # Centered horizontally
@@ -95,7 +84,7 @@ progress = 0
 goals = [20, 50, 100]  # Goals for player transformation
 current_goal = goals[0]
 
-# Current player image
+# текущее состояние игрока
 current_player_image = player_images[current_level]
 
 # Item properties
@@ -169,15 +158,10 @@ def draw_score():
     screen.blit(score_text, (10, 10))
 
 def draw_progress_bar():
-    # Draw the background of the progress bar with rounded ends
     pygame.draw.rect(screen, (200, 200, 200, 100), (progress_bar_x, progress_bar_y, progress_bar_width, progress_bar_height), border_radius=10)
-    # Draw the progress with rounded ends and a nice blue shade
     progress_width = (progress / current_goal) * progress_bar_width
     pygame.draw.rect(screen, BLUE_SHADE, (progress_bar_x, progress_bar_y, progress_width, progress_bar_height), border_radius=10)
-    # Draw the nearest target on the progress bar
-    # target_text = font.render(f"Target: {current_goal}", True, BLACK)
-    # target_text_rect = target_text.get_rect(center=(progress_bar_x + progress_bar_width // 2, progress_bar_y + progress_bar_height // 2))
-    # screen.blit(target_text, target_text_rect)
+
 
 # Game loop
 running = True
