@@ -1,40 +1,48 @@
 import pygame
 import random
 import os
+from pygame.locals import *
 
+# Initialize pygame
 pygame.init()
 
-# Разрешение
+# Screen dimensions
 SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 
-# цвета
+# Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-BLUE_SHADE = (12, 98, 145)
+BLUE_SHADE = (100, 149, 237)  # Nice blue shade for the progress bar
+DARK_BLUE = (25, 25, 112)  # Dark blue for silhouettes
+LIGHT_GREY = (200, 200, 200, 150) 
 
+# Initialize screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Игра о переработке")
+pygame.display.set_caption("Recycle Game")
 
+# Clock
 clock = pygame.time.Clock()
 
-font = pygame.font.Font(None, 36)
+# Fonts
+font = pygame.font.Font(None, 36)  # Use a nicer font (replace "arial.ttf" with your font file)
+small_font = pygame.font.Font(None, 24)  # Smaller font for instructions
 
-#Фон
+# Load and resize background images
 backgrounds = [
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "first_level.jpg")), (SCREEN_WIDTH, SCREEN_HEIGHT)),  # Level 1
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "second_level.jpg")), (SCREEN_WIDTH, SCREEN_HEIGHT)),  # Level 2
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "third_level.jpg")), (SCREEN_WIDTH, SCREEN_HEIGHT))   # Level 3
 ]
-# Игрок
-player_images = [
-    pygame.transform.scale(pygame.image.load(os.path.join("assets", "player1.png")), (100, 100)),  # Level 1
-    pygame.transform.scale(pygame.image.load(os.path.join("assets", "player2.png")), (100, 100)),  # Level 2
-    pygame.transform.scale(pygame.image.load(os.path.join("assets", "player3.png")), (100, 100))   # Level 3
-]
 
+# Apply 15% blur to all backgrounds
+for i in range(len(backgrounds)):
+    backgrounds[i] = pygame.transform.smoothscale(backgrounds[i], (SCREEN_WIDTH // 7, SCREEN_HEIGHT // 7))
+    backgrounds[i] = pygame.transform.smoothscale(backgrounds[i], (SCREEN_WIDTH, SCREEN_HEIGHT))
 
-# Орг мусор
+# Load player image
+player_image = pygame.transform.scale(pygame.image.load(os.path.join("assets", "frog.png")), (100, 100))
+
 organic_size = (60, 60)
 organic_garbage_images = [
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "банана.png")), organic_size),
@@ -45,6 +53,7 @@ organic_garbage_images = [
 ]
 
 
+# Load recyclable plastic images and resize them to a small size
 plastic_size = (60, 60)  
 recyclable_plastic_images = [
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "пакетик.png")), plastic_size),
@@ -59,10 +68,22 @@ recyclable_plastic_images = [
 ]
 
 
-#Музыка
+# Load item images for the left section
+item_images = [
+    pygame.transform.scale(pygame.image.load(os.path.join("assets", "player1.png")), (50, 50)),  # Item 1
+    pygame.transform.scale(pygame.image.load(os.path.join("assets", "player2.png")), (50, 50)),  # Item 2
+    pygame.transform.scale(pygame.image.load(os.path.join("assets", "player3.png")), (50, 50))   # Item 3
+]
+
+# Load sounds (MP3 format)
+catch_organic_sound = pygame.mixer.Sound(os.path.join("assets", "frog.mp3"))
+unlock_item_sound = pygame.mixer.Sound(os.path.join("assets", "create.mp3"))
+
+# Load background music
 pygame.mixer.music.load(os.path.join("assets", "Aisatsana.mp3"))
 pygame.mixer.music.play(-1)  # Loop the music indefinitely
 
+# Game variables
 player_x = SCREEN_WIDTH // 2
 player_y = SCREEN_HEIGHT - 100
 player_width = 100
@@ -75,7 +96,7 @@ score = 0
 item_speed = 5
 current_level = 0
 
-# прогрес бар
+# Progress bar variables
 progress_bar_width = int(SCREEN_WIDTH * 0.6)  # 60% of the screen width
 progress_bar_height = 20
 progress_bar_x = (SCREEN_WIDTH - progress_bar_width) // 2  # Centered horizontally
@@ -84,10 +105,12 @@ progress = 0
 goals = [20, 50, 100]  # Goals for player transformation
 current_goal = goals[0]
 
-# текущее состояние игрока
-current_player_image = player_images[current_level]
+# Item section variables
+item_section_x = 10
+item_section_y = 100
+item_spacing = 60
+unlocked_items = []  # List of unlocked items
 
-# Item properties
 item_width = 40  # Same as plastic_size width
 item_height = 40  # Same as plastic_size height
 
@@ -105,7 +128,7 @@ def create_organic_waste():
     organic_waste.append({"rect": pygame.Rect(x, y, item_width, item_height), "image": image})
 
 def draw_player():
-    screen.blit(current_player_image, (player_x, player_y))
+    screen.blit(player_image, (player_x, player_y))
 
 def draw_items():
     for item in plastic_items:
@@ -124,7 +147,7 @@ def update_items():
             organic_waste.remove(waste)
 
 def check_collisions():
-    global score, progress, current_goal, current_player_image, item_speed, current_level
+    global score, progress, current_goal, item_speed, current_level
     player_rect = pygame.Rect(player_x, player_y, player_width, player_height)
     for item in plastic_items[:]:
         if player_rect.colliderect(item["rect"]):
@@ -132,11 +155,10 @@ def check_collisions():
             score += 1
             progress += 1
             if progress >= current_goal:
-                # Update player state and goal
-                if current_goal == 20:
-                    current_player_image = player_images[1]
-                elif current_goal == 50:
-                    current_player_image = player_images[2]
+                # Unlock a new item
+                if len(unlocked_items) < len(item_images):
+                    unlocked_items.append(len(unlocked_items))
+                    unlock_item_sound.play()
                 # Move to the next goal
                 goals.pop(0)
                 if goals:
@@ -152,45 +174,107 @@ def check_collisions():
         if player_rect.colliderect(waste["rect"]):
             organic_waste.remove(waste)
             score -= 1
+            catch_organic_sound.play()
 
 def draw_score():
-    score_text = font.render(f"Очки: {score}", True, WHITE)
+    score_text = font.render(f"Очки {score}", True, WHITE)
     screen.blit(score_text, (10, 10))
 
 def draw_progress_bar():
+    # Draw the background of the progress bar with rounded ends
     pygame.draw.rect(screen, (200, 200, 200, 100), (progress_bar_x, progress_bar_y, progress_bar_width, progress_bar_height), border_radius=10)
+    # Draw the progress with rounded ends and a nice blue shade
     progress_width = (progress / current_goal) * progress_bar_width
     pygame.draw.rect(screen, BLUE_SHADE, (progress_bar_x, progress_bar_y, progress_width, progress_bar_height), border_radius=10)
 
+def draw_item_section():
+    # Draw a light grey semi-transparent background for the item section
+    item_section_width = 70  # Width of the item section
+    item_section_height = len(item_images) * item_spacing + 20  # Height based on the number of items
+    background_surface = pygame.Surface((item_section_width, item_section_height), pygame.SRCALPHA)
+    background_surface.fill(LIGHT_GREY)
+    screen.blit(background_surface, (item_section_x - 10, item_section_y - 10))  # Offset for padding
+
+    # Draw the items
+    for i in range(len(item_images)):
+        if i in unlocked_items:
+            screen.blit(item_images[i], (item_section_x, item_section_y + i * item_spacing))
+        else:
+            # Draw a dark blue silhouette
+            silhouette = pygame.Surface((50, 50), pygame.SRCALPHA)
+            silhouette.fill(DARK_BLUE)
+            screen.blit(silhouette, (item_section_x, item_section_y + i * item_spacing))
+
+def draw_instruction_popup():
+    # Draw the blurred background (level 3)
+    screen.blit(backgrounds[2], (0, 0))
+    # Draw the popup box
+    popup_width = 600
+    popup_height = 400
+    popup_x = (SCREEN_WIDTH - popup_width) // 2
+    popup_y = (SCREEN_HEIGHT - popup_height) // 2
+    pygame.draw.rect(screen, (200, 200, 200, 200), (popup_x, popup_y, popup_width, popup_height), border_radius=20)
+    # Draw the title
+    title_text = font.render("Добро пожаловать в игру Recycle Game!", True, BLACK)
+    title_rect = title_text.get_rect(center=(SCREEN_WIDTH // 2, popup_y + 50))
+    screen.blit(title_text, title_rect)
+    # Draw the instruction text
+    instruction_text = [
+        "В этой игре вы играете за персонажа, который перерабатывает пластик,",
+        "чтобы спасти окружающую среду. Избегайте органических отходов",
+        "и собирайте как можно больше пластика,",
+        "чтобы разблокировать новые предметы и уровни",
+        "Удачи!"
+    ]
+    for i, line in enumerate(instruction_text):
+        line_surface = small_font.render(line, True, BLACK)
+        line_rect = line_surface.get_rect(center=(SCREEN_WIDTH // 2, popup_y + 150 + i * 30))
+        screen.blit(line_surface, line_rect)
+    # Draw the "Press SPACE to start" text
+    start_text = small_font.render("Нажмите ПРОБЕЛ, чтобы начать", True, BLACK)
+    start_rect = start_text.get_rect(center=(SCREEN_WIDTH // 2, popup_y + 350))
+    screen.blit(start_text, start_rect)
 
 # Game loop
 running = True
+show_instructions = True
 while running:
-    # Draw the current background
-    screen.blit(backgrounds[current_level], (0, 0))
+    if show_instructions:
+        # Draw the instruction popup
+        draw_instruction_popup()
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE:
+                    show_instructions = False
+    else:
+        # Draw the current background
+        screen.blit(backgrounds[current_level], (0, 0))
 
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            running = False
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
 
-    keys = pygame.key.get_pressed()
-    if keys[pygame.K_LEFT] and player_x > 0:
-        player_x -= player_speed
-    if keys[pygame.K_RIGHT] and player_x < SCREEN_WIDTH - player_width:
-        player_x += player_speed
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_LEFT] and player_x > 0:
+            player_x -= player_speed
+        if keys[pygame.K_RIGHT] and player_x < SCREEN_WIDTH - player_width:
+            player_x += player_speed
 
-    if random.randint(1, 100) < 5:
-        create_plastic_item()
-    if random.randint(1, 100) < 3:
-        create_organic_waste()
+        if random.randint(1, 100) < 5:
+            create_plastic_item()
+        if random.randint(1, 100) < 3:
+            create_organic_waste()
 
-    update_items()
-    check_collisions()
+        update_items()
+        check_collisions()
 
-    draw_player()
-    draw_items()
-    draw_score()
-    draw_progress_bar()
+        draw_player()
+        draw_items()
+        draw_score()
+        draw_progress_bar()
+        draw_item_section()
 
     pygame.display.flip()
     clock.tick(30)
