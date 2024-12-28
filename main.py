@@ -11,10 +11,10 @@ SCREEN_HEIGHT = 600
 # цвета
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-BLUE_SHADE = (100, 149, 237)
+BLUE_SHADE = (12, 98, 145)
 
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-pygame.display.set_caption("Recycle Game")
+pygame.display.set_caption("Игра о переработке")
 
 clock = pygame.time.Clock()
 
@@ -154,7 +154,7 @@ def check_collisions():
             score -= 1
 
 def draw_score():
-    score_text = font.render(f"Score: {score}", True, WHITE)
+    score_text = font.render(f"Очки: {score}", True, WHITE)
     screen.blit(score_text, (10, 10))
 
 def draw_progress_bar():
