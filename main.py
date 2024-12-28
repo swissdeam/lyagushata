@@ -12,10 +12,7 @@ SCREEN_HEIGHT = 600
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-GREEN = (0, 255, 0)
-RED = (255, 0, 0)
-BLUE = (0, 0, 255)
-YELLOW = (255, 255, 0)
+BLUE_SHADE = (100, 149, 237)  # Nice blue shade for the progress bar
 
 # Initialize screen
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
@@ -25,18 +22,25 @@ pygame.display.set_caption("Recycle Game")
 clock = pygame.time.Clock()
 
 # Fonts
-font = pygame.font.Font(None, 36)
+font = pygame.font.Font(None, 36)  # Use a nicer font (replace "arial.ttf" with your font file)
 
-# Load background images
 
+# Load and resize background images
 backgrounds = [
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "first_level.jpg")), (SCREEN_WIDTH, SCREEN_HEIGHT)),  # Level 1
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "second_level.jpg")), (SCREEN_WIDTH, SCREEN_HEIGHT)),  # Level 2
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "third_level.jpg")), (SCREEN_WIDTH, SCREEN_HEIGHT))   # Level 3
 ]
+# Load player images for each level
+player_images = [
+    pygame.transform.scale(pygame.image.load(os.path.join("assets", "player1.png")), (100, 100)),  # Level 1
+    pygame.transform.scale(pygame.image.load(os.path.join("assets", "player2.png")), (100, 100)),  # Level 2
+    pygame.transform.scale(pygame.image.load(os.path.join("assets", "player3.png")), (100, 100))   # Level 3
+]
+
 
 # Load organic garbage images
-organic_size = (60, 60) 
+organic_size = (60, 60)
 organic_garbage_images = [
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "банана.png")), organic_size),
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "ветка.png")), organic_size),
@@ -48,34 +52,37 @@ organic_garbage_images = [
 
 
 
-plastic_size = (60, 60)  # All plastic items will be 40x40 pixels
+plastic_size = (60, 60)  
 recyclable_plastic_images = [
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "пакетик.png")), plastic_size),
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "пакетик_2.png")), plastic_size),
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "пакетик_3.png")), plastic_size),
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "пэт-бутылка.png")), plastic_size),
-    pygame.transform.scale(pygame.image.load(os.path.join("assets", "бутылка_2.png")), plastic_size),
-    pygame.transform.scale(pygame.image.load(os.path.join("assets", "бутылка_3.png")), plastic_size),
+    # pygame.transform.scale(pygame.image.load(os.path.join("assets", "бутылка_2.png")), plastic_size),
+    # pygame.transform.scale(pygame.image.load(os.path.join("assets", "бутылка_3.png")), plastic_size),
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "контейнер.png")), plastic_size),
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "контейнер_2.png")), plastic_size),
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "контейнер_3.png")), plastic_size)
 ]
 
+
 # Load background music
 pygame.mixer.music.load(os.path.join("assets", "Aisatsana.mp3"))
 pygame.mixer.music.play(-1)  # Loop the music indefinitely
 
+
+
+
 # Game variables
 player_x = SCREEN_WIDTH // 2
-player_y = SCREEN_HEIGHT - 50
+player_y = SCREEN_HEIGHT - 100
 player_width = 100
-player_height = 20
+player_height = 100
 player_speed = 10
 
 plastic_items = []
 organic_waste = []
 score = 0
-recycled_items = 0
 item_speed = 5
 current_level = 0
 
@@ -88,26 +95,12 @@ progress = 0
 goals = [20, 50, 100]  # Goals for player transformation
 current_goal = goals[0]
 
-# Player transformation states
-player_states = [
-    pygame.Surface((player_width, player_height)),  # Default state
-    pygame.Surface((player_width, player_height)),  # State after 20 items
-    pygame.Surface((player_width, player_height)),  # State after 50 items
-    pygame.Surface((player_width, player_height))   # State after 100 items
-]
-
-# Fill player states with different colors for visual distinction
-player_states[0].fill(GREEN)  # Default state
-player_states[1].fill(BLUE)   # State after 20 items
-player_states[2].fill(YELLOW) # State after 50 items
-player_states[3].fill(RED)    # State after 100 items
-
-# Current player state
-current_player_state = player_states[0]
+# Current player image
+current_player_image = player_images[current_level]
 
 # Item properties
-item_width = 30
-item_height = 30
+item_width = 40  # Same as plastic_size width
+item_height = 40  # Same as plastic_size height
 
 # Functions
 def create_plastic_item():
@@ -123,7 +116,7 @@ def create_organic_waste():
     organic_waste.append({"rect": pygame.Rect(x, y, item_width, item_height), "image": image})
 
 def draw_player():
-    screen.blit(current_player_state, (player_x, player_y))
+    screen.blit(current_player_image, (player_x, player_y))
 
 def draw_items():
     for item in plastic_items:
@@ -142,23 +135,19 @@ def update_items():
             organic_waste.remove(waste)
 
 def check_collisions():
-    global score, recycled_items, progress, current_goal, current_player_state, item_speed, current_level
+    global score, progress, current_goal, current_player_image, item_speed, current_level
     player_rect = pygame.Rect(player_x, player_y, player_width, player_height)
     for item in plastic_items[:]:
         if player_rect.colliderect(item["rect"]):
             plastic_items.remove(item)
             score += 1
             progress += 1
-            if score % 50 == 0:
-                recycled_items += 1
             if progress >= current_goal:
                 # Update player state and goal
                 if current_goal == 20:
-                    current_player_state = player_states[1]
+                    current_player_image = player_images[1]
                 elif current_goal == 50:
-                    current_player_state = player_states[2]
-                elif current_goal == 100:
-                    current_player_state = player_states[3]
+                    current_player_image = player_images[2]
                 # Move to the next goal
                 goals.pop(0)
                 if goals:
@@ -176,23 +165,19 @@ def check_collisions():
             score -= 1
 
 def draw_score():
-    score_text = font.render(f"Score: {score}", True, BLACK)
+    score_text = font.render(f"Score: {score}", True, WHITE)
     screen.blit(score_text, (10, 10))
 
-def draw_recycled_items():
-    recycled_text = font.render(f"Recycled Items: {recycled_items}", True, BLACK)
-    screen.blit(recycled_text, (10, 50))
-
 def draw_progress_bar():
-    # Draw the background of the progress bar
-    pygame.draw.rect(screen, BLACK, (progress_bar_x, progress_bar_y, progress_bar_width, progress_bar_height))
-    # Draw the progress
+    # Draw the background of the progress bar with rounded ends
+    pygame.draw.rect(screen, (200, 200, 200, 100), (progress_bar_x, progress_bar_y, progress_bar_width, progress_bar_height), border_radius=10)
+    # Draw the progress with rounded ends and a nice blue shade
     progress_width = (progress / current_goal) * progress_bar_width
-    pygame.draw.rect(screen, GREEN, (progress_bar_x, progress_bar_y, progress_width, progress_bar_height))
+    pygame.draw.rect(screen, BLUE_SHADE, (progress_bar_x, progress_bar_y, progress_width, progress_bar_height), border_radius=10)
     # Draw the nearest target on the progress bar
-    target_text = font.render(f"Target: {current_goal}", True, BLACK)
-    target_text_rect = target_text.get_rect(center=(progress_bar_x + progress_bar_width // 2, progress_bar_y + progress_bar_height // 2))
-    screen.blit(target_text, target_text_rect)
+    # target_text = font.render(f"Target: {current_goal}", True, BLACK)
+    # target_text_rect = target_text.get_rect(center=(progress_bar_x + progress_bar_width // 2, progress_bar_y + progress_bar_height // 2))
+    # screen.blit(target_text, target_text_rect)
 
 # Game loop
 running = True
@@ -221,7 +206,6 @@ while running:
     draw_player()
     draw_items()
     draw_score()
-    draw_recycled_items()
     draw_progress_bar()
 
     pygame.display.flip()
