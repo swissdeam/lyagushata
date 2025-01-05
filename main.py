@@ -25,22 +25,23 @@ pygame.display.set_caption("Recycle Game")
 clock = pygame.time.Clock()
 
 # Fonts
-font = pygame.font.Font(None, 36)  # Use a nicer font (replace "arial.ttf" with your font file)
-small_font = pygame.font.Font(None, 24)  # Smaller font for instructions
+font = pygame.font.Font(None, 36) 
+small_font = pygame.font.Font(None, 24) 
 
-# Load and resize background images
+
 backgrounds = [
-    pygame.transform.scale(pygame.image.load(os.path.join("assets", "first_level.jpg")), (SCREEN_WIDTH, SCREEN_HEIGHT)),  # Level 1
-    pygame.transform.scale(pygame.image.load(os.path.join("assets", "second_level.jpg")), (SCREEN_WIDTH, SCREEN_HEIGHT)),  # Level 2
-    pygame.transform.scale(pygame.image.load(os.path.join("assets", "third_level.jpg")), (SCREEN_WIDTH, SCREEN_HEIGHT))   # Level 3
+    pygame.transform.scale(pygame.image.load(os.path.join("assets", "1.jpg")), (SCREEN_WIDTH, SCREEN_HEIGHT)),  # Level 1
+    pygame.transform.scale(pygame.image.load(os.path.join("assets", "2.jpg")), (SCREEN_WIDTH, SCREEN_HEIGHT)),  # Level 2
+    pygame.transform.scale(pygame.image.load(os.path.join("assets", "3.jpg")), (SCREEN_WIDTH, SCREEN_HEIGHT)),   # Level 3
+    pygame.transform.scale(pygame.image.load(os.path.join("assets", "4.jpg")), (SCREEN_WIDTH, SCREEN_HEIGHT)),  # Level 3
+    pygame.transform.scale(pygame.image.load(os.path.join("assets", "third_level.jpg")), (SCREEN_WIDTH, SCREEN_HEIGHT)),   # Level 3
+    pygame.transform.scale(pygame.image.load(os.path.join("assets", "5.jpg")), (SCREEN_WIDTH, SCREEN_HEIGHT)),   # Level 3
 ]
 
-# Apply 15% blur to all backgrounds
 for i in range(len(backgrounds)):
     backgrounds[i] = pygame.transform.smoothscale(backgrounds[i], (SCREEN_WIDTH // 7, SCREEN_HEIGHT // 7))
     backgrounds[i] = pygame.transform.smoothscale(backgrounds[i], (SCREEN_WIDTH, SCREEN_HEIGHT))
 
-# Load player image
 player_image = pygame.transform.scale(pygame.image.load(os.path.join("assets", "frog.png")), (100, 100))
 
 organic_size = (60, 60)
@@ -53,7 +54,6 @@ organic_garbage_images = [
 ]
 
 
-# Load recyclable plastic images and resize them to a small size
 plastic_size = (60, 60)  
 recyclable_plastic_images = [
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "пакетик.png")), plastic_size),
@@ -68,22 +68,20 @@ recyclable_plastic_images = [
 ]
 
 
-# Load item images for the left section
 item_images = [
     pygame.transform.scale(pygame.image.load(os.path.join("assets", "player1.png")), (50, 50)),  # Item 1
-    pygame.transform.scale(pygame.image.load(os.path.join("assets", "player2.png")), (50, 50)),  # Item 2
-    pygame.transform.scale(pygame.image.load(os.path.join("assets", "player3.png")), (50, 50))   # Item 3
+    pygame.transform.scale(pygame.image.load(os.path.join("assets", "player5.png")), (50, 50)),  # Item 2
+    pygame.transform.scale(pygame.image.load(os.path.join("assets", "player4.png")), (50, 50)),   # Item 3
+    pygame.transform.scale(pygame.image.load(os.path.join("assets", "player2.png")), (50, 50)),   # Item 3
+    pygame.transform.scale(pygame.image.load(os.path.join("assets", "player3.png")), (50, 50)),   # Item 3
 ]
 
-# Load sounds (MP3 format)
 catch_organic_sound = pygame.mixer.Sound(os.path.join("assets", "frog.mp3"))
-unlock_item_sound = pygame.mixer.Sound(os.path.join("assets", "create.mp3"))
+unlock_item_sound = pygame.mixer.Sound(os.path.join("assets", "win.mp3"))
 
-# Load background music
 pygame.mixer.music.load(os.path.join("assets", "Aisatsana.mp3"))
 pygame.mixer.music.play(-1)  # Loop the music indefinitely
 
-# Game variables
 player_x = SCREEN_WIDTH // 2
 player_y = SCREEN_HEIGHT - 100
 player_width = 100
@@ -102,7 +100,7 @@ progress_bar_height = 20
 progress_bar_x = (SCREEN_WIDTH - progress_bar_width) // 2  # Centered horizontally
 progress_bar_y = 10  # 10 pixels from the top
 progress = 0
-goals = [20, 50, 100]  # Goals for player transformation
+goals = [20, 50, 70, 100, 120]  # Goals for player transformation
 current_goal = goals[0]
 
 # Item section variables
